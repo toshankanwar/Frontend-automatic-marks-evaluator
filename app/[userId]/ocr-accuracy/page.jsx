@@ -4,7 +4,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Navbar from "@/components/Navbar";
 import { Upload, FileText, History, BarChart3, ChevronDown, ChevronUp } from "lucide-react";
-
+export const runtime = "edge";
 export default function OcrAccuracyPage() {
   const { userid } = useParams();
   const router = useRouter();
