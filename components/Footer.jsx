@@ -63,7 +63,7 @@ export default function Footer() {
             </a>
 
             <a
-              href="mailto:hello@toshankanwar.in"
+              href="mailto:developer@toshankanwar.in"
               className="flex items-center gap-2 hover:text-emerald-700"
             >
               <Mail size={14} />

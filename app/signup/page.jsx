@@ -50,13 +50,11 @@ export default function SignupPage() {
 
   return (
     <main className="relative flex min-h-screen items-center justify-center overflow-hidden bg-gradient-to-br from-emerald-50 via-green-50 to-white px-4 py-10">
-      {/* Background blobs */}
       <div className="pointer-events-none absolute -left-24 -top-24 h-80 w-80 rounded-full bg-emerald-200/40 blur-3xl" />
       <div className="pointer-events-none absolute -bottom-20 -right-20 h-80 w-80 rounded-full bg-green-200/40 blur-3xl" />
 
       <div className="w-full max-w-5xl overflow-hidden rounded-3xl border border-emerald-100 bg-white/90 shadow-2xl backdrop-blur">
         <div className="grid md:grid-cols-2">
-          {/* Left panel */}
           <div className="hidden bg-gradient-to-br from-emerald-600 to-green-600 p-10 text-white md:block">
             <div className="mb-6 inline-flex items-center gap-2 rounded-full bg-white/15 px-4 py-1 text-sm">
               <ShieldCheck size={16} />
@@ -77,7 +75,6 @@ export default function SignupPage() {
             </div>
           </div>
 
-          {/* Right panel */}
           <div className="p-6 sm:p-10">
             <div className="mb-6 flex items-center gap-3">
               <div className="rounded-xl bg-emerald-100 p-2 text-emerald-700">
@@ -92,7 +89,6 @@ export default function SignupPage() {
             </div>
 
             <form onSubmit={onSubmit} className="space-y-4">
-              {/* Name */}
               <div>
                 <label className="mb-1 block text-sm font-medium text-slate-700">
                   Full Name
@@ -102,14 +98,13 @@ export default function SignupPage() {
                   <input
                     type="text"
                     placeholder="Your name"
-                    className="w-full bg-transparent px-3 py-3 text-sm outline-none placeholder:text-slate-400"
+                    className="w-full bg-transparent px-3 py-3 text-sm text-slate-900 caret-emerald-600 outline-none placeholder:text-slate-400"
                     value={form.name}
                     onChange={(e) => setForm({ ...form, name: e.target.value })}
                   />
                 </div>
               </div>
 
-              {/* Email */}
               <div>
                 <label className="mb-1 block text-sm font-medium text-slate-700">
                   Email
@@ -119,14 +114,13 @@ export default function SignupPage() {
                   <input
                     type="email"
                     placeholder="you@example.com"
-                    className="w-full bg-transparent px-3 py-3 text-sm outline-none placeholder:text-slate-400"
+                    className="w-full bg-transparent px-3 py-3 text-sm text-slate-900 caret-emerald-600 outline-none placeholder:text-slate-400"
                     value={form.email}
                     onChange={(e) => setForm({ ...form, email: e.target.value })}
                   />
                 </div>
               </div>
 
-              {/* Password */}
               <div>
                 <label className="mb-1 block text-sm font-medium text-slate-700">
                   Password
@@ -136,7 +130,7 @@ export default function SignupPage() {
                   <input
                     type={showPass ? "text" : "password"}
                     placeholder="Minimum 6 characters"
-                    className="w-full bg-transparent px-3 py-3 text-sm outline-none placeholder:text-slate-400"
+                    className="w-full bg-transparent px-3 py-3 text-sm text-slate-900 caret-emerald-600 outline-none placeholder:text-slate-400"
                     value={form.password}
                     onChange={(e) => setForm({ ...form, password: e.target.value })}
                   />

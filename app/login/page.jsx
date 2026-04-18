@@ -97,12 +97,12 @@ export default function LoginPage() {
                 <div className="group flex items-center rounded-xl border border-emerald-200 bg-white px-3 transition focus-within:border-emerald-400 focus-within:ring-2 focus-within:ring-emerald-100">
                   <Mail size={18} className="text-slate-400 group-focus-within:text-emerald-600" />
                   <input
-                    type="email"
-                    placeholder="you@example.com"
-                    className="w-full bg-transparent px-3 py-3 text-sm outline-none placeholder:text-slate-400"
-                    value={form.email}
-                    onChange={(e) => setForm({ ...form, email: e.target.value })}
-                  />
+  type="email"
+  placeholder="you@example.com"
+  className="w-full bg-transparent px-3 py-3 text-sm text-slate-900 caret-emerald-600 outline-none placeholder:text-slate-400"
+  value={form.email}
+  onChange={(e) => setForm({ ...form, email: e.target.value })}
+/>
                 </div>
               </div>
 
@@ -114,12 +114,12 @@ export default function LoginPage() {
                 <div className="group flex items-center rounded-xl border border-emerald-200 bg-white px-3 transition focus-within:border-emerald-400 focus-within:ring-2 focus-within:ring-emerald-100">
                   <Lock size={18} className="text-slate-400 group-focus-within:text-emerald-600" />
                   <input
-                    type={showPass ? "text" : "password"}
-                    placeholder="Enter password"
-                    className="w-full bg-transparent px-3 py-3 text-sm outline-none placeholder:text-slate-400"
-                    value={form.password}
-                    onChange={(e) => setForm({ ...form, password: e.target.value })}
-                  />
+  type={showPass ? "text" : "password"}
+  placeholder="Enter password"
+  className="w-full bg-transparent px-3 py-3 text-sm text-slate-900 caret-emerald-600 outline-none placeholder:text-slate-400"
+  value={form.password}
+  onChange={(e) => setForm({ ...form, password: e.target.value })}
+/>
                   <button
                     type="button"
                     onClick={() => setShowPass((s) => !s)}
