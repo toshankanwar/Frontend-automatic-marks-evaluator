@@ -2,7 +2,7 @@
 
 :root {
   --background: #f8fafc;   /* slate-50 */
-  --foreground: #0f172a;   /* slate-900 */
+  --foreground: #e5e7eb;   /* slate-900 */
 }
 
 @theme inline {
@@ -17,7 +17,7 @@
 /* Optional: keep dark mode stable but not pure black */
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0b1220;
+    --background: #e5e7eb;
     --foreground: #e5e7eb;
   }
 }
