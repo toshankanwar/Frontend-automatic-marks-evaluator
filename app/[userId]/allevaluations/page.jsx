@@ -7,7 +7,7 @@ import Protected from "@/components/Protected";
 import Navbar from "@/components/Navbar";
 import EvalCard from "@/components/EvalCard";
 import toast from "react-hot-toast";
-
+export const runtime = "edge";
 export default function AllEvaluationsPage() {
   const params = useParams();
   const router = useRouter();

@@ -19,7 +19,7 @@ import api from "@/lib/api";
 import Protected from "@/components/Protected";
 import Navbar from "@/components/Navbar";
 import toast from "react-hot-toast";
-
+export const runtime = "edge";
 export default function UploadPage() {
   const params = useParams();
   const router = useRouter();
