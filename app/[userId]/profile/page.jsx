@@ -5,7 +5,7 @@ import { getToken, getUser, logout } from "@/lib/auth";
 import { useParams, useRouter } from "next/navigation";
 import Navbar from "@/components/Navbar";
 import { User2, Mail, Trash2, AlertTriangle, CheckCircle2 } from "lucide-react";
-
+export const runtime = 'edge';
 export default function ProfilePage() {
   const { userId } = useParams();
   const router = useRouter();
