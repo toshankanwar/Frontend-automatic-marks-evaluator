@@ -27,7 +27,7 @@ export default function OcrAccuracyPage() {
   const [error, setError] = useState("");
   const [expandedRows, setExpandedRows] = useState({});
 
-  const API_BASE = process.env.NEXT_PUBLIC_API_BASE || "http://localhost:8000";
+  const API_BASE = process.env.NEXT_PUBLIC_API_BASE ;
 
   useEffect(() => {
     const token = localStorage.getItem("token");
