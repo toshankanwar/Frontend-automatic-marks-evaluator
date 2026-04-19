@@ -4,6 +4,20 @@ Production-ready frontend for **AutoGrade** — an AI-powered academic evaluatio
 
 ---
 
+## 📸 Screenshots
+
+### Login Page
+![Login Page](./public/ss/Screenshot1.png)
+
+### Evaluation Page
+![Evaluation Page](./public/ss/Screenshot2.png)
+
+### Upload Page
+![Upload Page](./public/ss/Screenshot3.png)
+
+### Result Page
+![Result Page](./public/ss/Screenshot4.png)
+
 ## Features
 
 - Modern responsive UI (desktop + mobile)
