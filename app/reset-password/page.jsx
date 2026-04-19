@@ -1,11 +1,11 @@
 "use client";
 
+import { Suspense, useState } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
-import { useState } from "react";
 import Navbar from "@/components/Navbar";
 import { KeyRound } from "lucide-react";
 
-export default function ResetPasswordPage() {
+function ResetPasswordForm() {
   const params = useSearchParams();
   const router = useRouter();
   const token = params.get("token") || "";
@@ -13,21 +13,27 @@ export default function ResetPasswordPage() {
   const [new_password, setNewPassword] = useState("");
   const [confirm_password, setConfirmPassword] = useState("");
   const [msg, setMsg] = useState("");
+  const [msgType, setMsgType] = useState("success");
   const [loading, setLoading] = useState(false);
+
+  const showMessage = (text, type = "success") => {
+    setMsg(text);
+    setMsgType(type);
+  };
 
   const submit = async () => {
     setMsg("");
 
     if (!token) {
-      setMsg("Invalid reset link (token missing).");
+      showMessage("Invalid reset link (token missing).", "error");
       return;
     }
     if (!new_password || !confirm_password) {
-      setMsg("Please fill all fields.");
+      showMessage("Please fill all fields.", "error");
       return;
     }
     if (new_password !== confirm_password) {
-      setMsg("New password and confirm password do not match.");
+      showMessage("New password and confirm password do not match.", "error");
       return;
     }
 
@@ -42,10 +48,10 @@ export default function ResetPasswordPage() {
       const data = await res.json().catch(() => ({}));
       if (!res.ok) throw new Error(data?.detail || "Password reset failed");
 
-      setMsg("Password reset successful. Redirecting to login...");
+      showMessage("Password reset successful. Redirecting to login...", "success");
       setTimeout(() => router.push("/login"), 1200);
     } catch (e) {
-      setMsg(e.message || "Something went wrong.");
+      showMessage(e.message || "Something went wrong.", "error");
     } finally {
       setLoading(false);
     }
@@ -88,11 +94,23 @@ export default function ResetPasswordPage() {
                 {loading ? "Updating..." : "Reset Password"}
               </button>
 
-              {msg && <p className="text-sm text-emerald-700">{msg}</p>}
+              {msg && (
+                <p className={`text-sm ${msgType === "error" ? "text-red-600" : "text-emerald-700"}`}>
+                  {msg}
+                </p>
+              )}
             </div>
           </div>
         </div>
       </main>
     </>
+  );
+}
+
+export default function ResetPasswordPage() {
+  return (
+    <Suspense fallback={<div className="p-6 text-sm text-gray-600">Loading reset page...</div>}>
+      <ResetPasswordForm />
+    </Suspense>
   );
 }
