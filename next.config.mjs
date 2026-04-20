@@ -1,6 +1,13 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  /* config options here */
+  images: {
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "static-assets.toshankanwar.in",
+      },
+    ],
+  },
 };
 
 export default nextConfig;
