@@ -9,7 +9,7 @@ import {
   ClipboardList,
   User,
   KeyRound,
-  ChevronDown
+  ChevronDown,
 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { logout, getUser } from "@/lib/auth";
@@ -53,7 +53,6 @@ export default function Navbar() {
   const ocrHref = userId ? `/${userId}/ocr-accuracy` : "/login";
   const profileHref = userId ? `/${userId}/profile` : "/login";
   const resetPassHref = userId ? `/${userId}/reset-password` : "/login";
-  const aboutHref = "/about"; // added
 
   const isActive = (href) => pathname?.startsWith(href);
 
