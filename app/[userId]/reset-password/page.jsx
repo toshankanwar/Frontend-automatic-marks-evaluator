@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { getToken, getUser } from "@/lib/auth";
 import { useParams, useRouter } from "next/navigation";
 import Navbar from "@/components/Navbar";
-import { KeyRound, LockKeyhole, ShieldCheck } from "lucide-react";
+import { KeyRound, LockKeyhole, ShieldCheck, Eye, EyeOff } from "lucide-react";
 
 export const runtime = "edge";
 
@@ -18,6 +18,10 @@ export default function UserResetPasswordPage() {
   const [old_password, setOld] = useState("");
   const [new_password, setNew] = useState("");
   const [confirm_password, setConfirm] = useState("");
+
+  const [showOldPassword, setShowOldPassword] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const [msg, setMsg] = useState("");
   const [msgType, setMsgType] = useState("success");
@@ -99,13 +103,22 @@ export default function UserResetPasswordPage() {
                   <LockKeyhole size={16} />
                   Current Password
                 </label>
-                <input
-                  type="password"
-                  placeholder="Enter current password"
-                  value={old_password}
-                  onChange={(e) => setOld(e.target.value)}
-                  className="w-full rounded-2xl border border-emerald-300 bg-white px-4 py-3 text-base text-gray-900 placeholder:text-gray-400 outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200"
-                />
+                <div className="relative">
+                  <input
+                    type={showOldPassword ? "text" : "password"}
+                    placeholder="Enter current password"
+                    value={old_password}
+                    onChange={(e) => setOld(e.target.value)}
+                    className="w-full rounded-2xl border border-emerald-300 bg-white px-4 py-3 pr-12 text-base text-gray-900 placeholder:text-gray-400 outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowOldPassword((v) => !v)}
+                    className="absolute inset-y-0 right-3 inline-flex items-center text-emerald-700 hover:text-emerald-900"
+                  >
+                    {showOldPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                  </button>
+                </div>
               </div>
 
               <div>
@@ -113,26 +126,44 @@ export default function UserResetPasswordPage() {
                   <ShieldCheck size={16} />
                   New Password
                 </label>
-                <input
-                  type="password"
-                  placeholder="Enter new password"
-                  value={new_password}
-                  onChange={(e) => setNew(e.target.value)}
-                  className="w-full rounded-2xl border border-emerald-300 bg-white px-4 py-3 text-base text-gray-900 placeholder:text-gray-400 outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200"
-                />
+                <div className="relative">
+                  <input
+                    type={showNewPassword ? "text" : "password"}
+                    placeholder="Enter new password"
+                    value={new_password}
+                    onChange={(e) => setNew(e.target.value)}
+                    className="w-full rounded-2xl border border-emerald-300 bg-white px-4 py-3 pr-12 text-base text-gray-900 placeholder:text-gray-400 outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowNewPassword((v) => !v)}
+                    className="absolute inset-y-0 right-3 inline-flex items-center text-emerald-700 hover:text-emerald-900"
+                  >
+                    {showNewPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                  </button>
+                </div>
               </div>
 
               <div>
                 <label className="mb-2 block text-sm md:text-base font-semibold text-emerald-900">
                   Confirm New Password
                 </label>
-                <input
-                  type="password"
-                  placeholder="Re-enter new password"
-                  value={confirm_password}
-                  onChange={(e) => setConfirm(e.target.value)}
-                  className="w-full rounded-2xl border border-emerald-300 bg-white px-4 py-3 text-base text-gray-900 placeholder:text-gray-400 outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200"
-                />
+                <div className="relative">
+                  <input
+                    type={showConfirmPassword ? "text" : "password"}
+                    placeholder="Re-enter new password"
+                    value={confirm_password}
+                    onChange={(e) => setConfirm(e.target.value)}
+                    className="w-full rounded-2xl border border-emerald-300 bg-white px-4 py-3 pr-12 text-base text-gray-900 placeholder:text-gray-400 outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowConfirmPassword((v) => !v)}
+                    className="absolute inset-y-0 right-3 inline-flex items-center text-emerald-700 hover:text-emerald-900"
+                  >
+                    {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                  </button>
+                </div>
               </div>
 
               <button

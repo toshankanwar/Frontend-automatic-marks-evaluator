@@ -2,7 +2,7 @@ import "./globals.css";
 import { Toaster } from "react-hot-toast";
 import { Inter } from "next/font/google";
 import Footer from "@/components/Footer";
-
+import PWARegister from "./pwa-register";
 const inter = Inter({
   subsets: ["latin"],
   variable: "--font-inter",
@@ -80,7 +80,7 @@ export const metadata = {
     shortcut: "/favicon.ico",
     apple: "/apple-touch-icon.png", // optional
   },
-
+  manifest: "/manifest.json",
   // Canonical
   alternates: {
     canonical: "/",
@@ -97,6 +97,7 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en">
       <body className={`${inter.variable} font-sans bg-slate-50 text-slate-900`}>
+      <PWARegister />
         <div id="Genz-Toshan">
         <Toaster position="top-right" />
         {children}

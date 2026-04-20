@@ -1,0 +1,21 @@
+{
+    "name": "AutoGrade Toshan",
+    "short_name": "AutoGrade Toshan",
+    "description": "AI-powered academic evaluation platform with OCR and smart grading workflows.",
+    "start_url": "/",
+    "scope": "/",
+    "display": "standalone",
+    "orientation": "portrait",
+    "background_color": "#f8fafc",
+    "theme_color": "#10b981",
+    "lang": "en",
+    "categories": ["education", "productivity"],
+    "icons": [
+      {
+        "src": "/icons/icon-144x144.png",
+        "sizes": "144x144",
+        "type": "image/png",
+        "purpose": "any"
+      }
+    ]
+  }
