@@ -1,6 +1,5 @@
 "use client";
 export const runtime = "edge";
-
 import React, { useEffect, useMemo, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import {
@@ -17,6 +16,10 @@ import {
   ChevronDown,
   ChevronUp,
   Download,
+  Clock3,
+  Timer,
+  AlertTriangle,
+  BarChart3,
 } from "lucide-react";
 import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
@@ -24,6 +27,15 @@ import api from "@/lib/api";
 import Protected from "@/components/Protected";
 import Navbar from "@/components/Navbar";
 import toast from "react-hot-toast";
+
+const msToSec = (ms) => {
+  const n = Number(ms);
+  if (Number.isNaN(n)) return "N/A";
+  return `${(n / 1000).toFixed(2)}s`;
+};
+
+const safe = (v, fallback = "N/A") =>
+  v === undefined || v === null || v === "" ? fallback : v;
 
 export default function ResultsPage() {
   const params = useParams();
@@ -34,13 +46,18 @@ export default function ResultsPage() {
     [params]
   );
   const evaluationId = useMemo(
-    () => (Array.isArray(params?.evaluationId) ? params.evaluationId[0] : params?.evaluationId),
+    () =>
+      Array.isArray(params?.evaluationId)
+        ? params.evaluationId[0]
+        : params?.evaluationId,
     [params]
   );
 
   const [results, setResults] = useState([]);
+  const [batchTiming, setBatchTiming] = useState(null);
+
   const [editingTotal, setEditingTotal] = useState({});
-  const [editingQuestion, setEditingQuestion] = useState({}); // key: `${studentId}_${qNo}`
+  const [editingQuestion, setEditingQuestion] = useState({});
   const [savingId, setSavingId] = useState("");
   const [savingQuestionKey, setSavingQuestionKey] = useState("");
   const [loading, setLoading] = useState(false);
@@ -48,17 +65,37 @@ export default function ResultsPage() {
   const [query, setQuery] = useState("");
   const [sortBy, setSortBy] = useState("marks_desc");
 
-  const getStudentId = (r) => r?.student_id || r?.roll_no || r?.admission_no || r?.id || "N/A";
+  const getStudentId = (r) =>
+    r?.student_id || r?.roll_no || r?.admission_no || r?.id || "N/A";
 
   const load = async () => {
     if (!userId || !evaluationId) return;
     try {
       setLoading(true);
-      const { data } = await api.get(`/users/${userId}/evaluations/${evaluationId}/results`);
-      setResults(Array.isArray(data) ? data : []);
+
+      const { data } = await api.get(
+        `/users/${userId}/evaluations/${evaluationId}/results`,
+        {
+          params: { _t: Date.now() },
+          headers: { "Cache-Control": "no-cache" },
+        }
+      );
+
+      console.log("RESULTS_API_DATA =>", data);
+
+      // New backend shape: { batch_timing, results: [] }
+      if (Array.isArray(data)) {
+        setResults(data);
+        setBatchTiming(null);
+      } else {
+        setResults(Array.isArray(data?.results) ? data.results : []);
+        setBatchTiming(data?.batch_timing || null);
+      }
     } catch (e) {
-      console.error(e?.response?.data || e.message);
+      console.error("RESULTS_FETCH_ERROR =>", e?.response?.data || e.message);
       toast.error("Failed to fetch results");
+      setResults([]);
+      setBatchTiming(null);
     } finally {
       setLoading(false);
     }
@@ -69,7 +106,6 @@ export default function ResultsPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [userId, evaluationId]);
 
-  // Existing total update
   const updateMarks = async (studentId, totalMax) => {
     const raw = editingTotal[studentId];
     const val = Number(raw);
@@ -77,7 +113,8 @@ export default function ResultsPage() {
     if (raw === undefined || raw === "") return toast.error("Enter marks first");
     if (Number.isNaN(val)) return toast.error("Invalid marks");
     if (val < 0) return toast.error("Marks cannot be negative");
-    if (val > Number(totalMax)) return toast.error(`Marks cannot exceed ${totalMax}`);
+    if (val > Number(totalMax))
+      return toast.error(`Marks cannot exceed ${totalMax}`);
 
     try {
       setSavingId(studentId);
@@ -96,16 +133,13 @@ export default function ResultsPage() {
     }
   };
 
-  // NEW per-question update
-  // Backend endpoint expected:
-  // PATCH /users/{userId}/evaluations/{evaluationId}/results/{studentId}/questions/{qNo}
-  // body: { awarded_marks: number, note: "Teacher updated question mark" }
   const updateQuestionMarks = async (studentId, qNo, qMax) => {
     const key = `${studentId}_${qNo}`;
     const raw = editingQuestion[key];
     const val = Number(raw);
 
-    if (raw === undefined || raw === "") return toast.error("Enter question marks first");
+    if (raw === undefined || raw === "")
+      return toast.error("Enter question marks first");
     if (Number.isNaN(val)) return toast.error("Invalid marks");
     if (val < 0) return toast.error("Marks cannot be negative");
     if (val > Number(qMax)) return toast.error(`Marks cannot exceed ${qMax}`);
@@ -144,7 +178,8 @@ export default function ResultsPage() {
     arr.sort((a, b) => {
       if (sortBy === "marks_desc") return Number(b.total_marks) - Number(a.total_marks);
       if (sortBy === "marks_asc") return Number(a.total_marks) - Number(b.total_marks);
-      if (sortBy === "name_desc") return (b.student_name || "").localeCompare(a.student_name || "");
+      if (sortBy === "name_desc")
+        return (b.student_name || "").localeCompare(a.student_name || "");
       return (a.student_name || "").localeCompare(b.student_name || "");
     });
 
@@ -153,7 +188,8 @@ export default function ResultsPage() {
 
   const stats = useMemo(() => {
     const totalStudents = results.length;
-    if (!totalStudents) return { totalStudents: 0, avgMarks: "0.00", highest: "0.00" };
+    if (!totalStudents)
+      return { totalStudents: 0, avgMarks: "0.00", highest: "0.00" };
 
     const sum = results.reduce((acc, r) => acc + Number(r.total_marks || 0), 0);
     const highest = Math.max(...results.map((r) => Number(r.total_marks || 0)));
@@ -167,11 +203,9 @@ export default function ResultsPage() {
 
   const toggleExpand = (id) => setExpanded((prev) => ({ ...prev, [id]: !prev[id] }));
 
-  // Excel with per-question + aggregate; no created/updated time/date
   const downloadExcel = () => {
     if (!results.length) return toast.error("No results to export");
-  
-    // Find all question numbers
+
     const qNoSet = new Set();
     results.forEach((r) => {
       (r.question_scores || []).forEach((q) => {
@@ -179,31 +213,52 @@ export default function ResultsPage() {
       });
     });
     const qNos = Array.from(qNoSet).sort((a, b) => a - b);
-  
+
     const rows = results.map((r) => {
       const row = {
         file_name: r.file_name || r.student_name || r.student_id || "unknown_file",
       };
-  
+
       const qMap = {};
       (r.question_scores || []).forEach((q) => {
         qMap[Number(q.q_no)] = q;
       });
-  
+
       qNos.forEach((qNo) => {
         row[`Q${qNo}`] = Number(qMap[qNo]?.awarded_marks ?? 0);
       });
-  
+
       row.total_marks = Number(r.total_marks || 0);
       row.out_of = Number(r.total_max_marks || 0);
-  
+
+      row.expected_questions = r?.validation?.expected_questions ?? "";
+      row.attempted_questions = r?.validation?.attempted_questions ?? "";
+      row.missing_questions = Array.isArray(r?.validation?.missing_questions)
+        ? r.validation.missing_questions.join(", ")
+        : "";
+
       return row;
     });
-  
+
     const wb = XLSX.utils.book_new();
     const ws = XLSX.utils.json_to_sheet(rows);
     XLSX.utils.book_append_sheet(wb, ws, "TeacherResults");
-  
+
+    // Batch timing sheet (NEW)
+    if (batchTiming) {
+      const batchRows = [
+        { metric: "Students Count", value: safe(batchTiming.students_count, 0) },
+        { metric: "Batch Upload (ms)", value: safe(batchTiming.batch_upload_ms, 0) },
+        { metric: "Batch OCR (ms)", value: safe(batchTiming.batch_ocr_ms, 0) },
+        { metric: "Batch Parser (ms)", value: safe(batchTiming.batch_parser_ms, 0) },
+        { metric: "Batch Scoring (ms)", value: safe(batchTiming.batch_scoring_ms, 0) },
+        { metric: "Batch Total (ms)", value: safe(batchTiming.batch_total_ms, 0) },
+        { metric: "Avg Total/Student (ms)", value: safe(batchTiming.avg_total_ms_per_student, 0) },
+      ];
+      const wsBatch = XLSX.utils.json_to_sheet(batchRows);
+      XLSX.utils.book_append_sheet(wb, wsBatch, "BatchTiming");
+    }
+
     const excelBuffer = XLSX.write(wb, { bookType: "xlsx", type: "array" });
     saveAs(
       new Blob([excelBuffer], {
@@ -211,9 +266,10 @@ export default function ResultsPage() {
       }),
       `evaluation_${evaluationId}_teacher_results.xlsx`
     );
-  
+
     toast.success("Teacher Excel downloaded");
   };
+
   return (
     <Protected>
       <Navbar />
@@ -227,7 +283,7 @@ export default function ResultsPage() {
                 </p>
                 <h1 className="text-2xl font-semibold text-slate-900">Student Performance</h1>
                 <p className="mt-1 text-sm text-slate-600">
-                  Question-wise breakdown + per-question and total mark update.
+                  Batch timing overview + question-wise breakdown + total update.
                 </p>
               </div>
 
@@ -250,10 +306,30 @@ export default function ResultsPage() {
             </div>
           </div>
 
+          {/* Academic stats */}
           <div className="mb-5 grid gap-3 sm:grid-cols-3">
             <StatCard icon={<Users size={16} />} label="Total Students" value={stats.totalStudents} />
             <StatCard icon={<Sigma size={16} />} label="Average Marks" value={stats.avgMarks} />
             <StatCard icon={<Trophy size={16} />} label="Highest Marks" value={stats.highest} />
+          </div>
+
+          {/* Batch timing cards (MAIN FOCUS) */}
+          <div className="mb-5 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+            <div className="mb-3 flex items-center gap-2">
+              <BarChart3 size={16} className="text-emerald-700" />
+              <h3 className="text-sm font-semibold text-slate-900">Batch Processing Timing (All Students Combined)</h3>
+            </div>
+            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
+              <MiniCard icon={<Users size={14} />} label="Students" value={String(safe(batchTiming?.students_count, 0))} />
+              <MiniCard icon={<Clock3 size={14} />} label="Upload" value={msToSec(batchTiming?.batch_upload_ms)} />
+              <MiniCard icon={<Clock3 size={14} />} label="OCR" value={msToSec(batchTiming?.batch_ocr_ms)} />
+              <MiniCard icon={<Clock3 size={14} />} label="Parser" value={msToSec(batchTiming?.batch_parser_ms)} />
+              <MiniCard icon={<Clock3 size={14} />} label="Scoring" value={msToSec(batchTiming?.batch_scoring_ms)} />
+              <MiniCard icon={<Timer size={14} />} label="Batch Total" value={msToSec(batchTiming?.batch_total_ms)} />
+            </div>
+            <p className="mt-3 text-xs text-slate-600">
+              Avg per student: <span className="font-semibold">{msToSec(batchTiming?.avg_total_ms_per_student)}</span>
+            </p>
           </div>
 
           <div className="mb-4 grid gap-3 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm md:grid-cols-[1fr_240px]">
@@ -292,6 +368,7 @@ export default function ResultsPage() {
                     <th className="px-4 py-3 text-left font-semibold">Student ID</th>
                     <th className="px-4 py-3 text-left font-semibold">Total</th>
                     <th className="px-4 py-3 text-left font-semibold">Out Of</th>
+                    <th className="px-4 py-3 text-left font-semibold">Validation</th>
                     <th className="px-4 py-3 text-left font-semibold">Override</th>
                     <th className="px-4 py-3 text-left font-semibold">Update Total</th>
                     <th className="px-4 py-3 text-left font-semibold">Details</th>
@@ -301,20 +378,22 @@ export default function ResultsPage() {
                 <tbody>
                   {loading ? (
                     <tr>
-                      <td colSpan={7} className="px-4 py-10 text-center text-slate-700">
+                      <td colSpan={8} className="px-4 py-10 text-center text-slate-700">
                         Loading results...
                       </td>
                     </tr>
                   ) : filteredSorted.length === 0 ? (
                     <tr>
-                      <td colSpan={7} className="px-4 py-10 text-center text-slate-700">
+                      <td colSpan={8} className="px-4 py-10 text-center text-slate-700">
                         No results found.
                       </td>
                     </tr>
                   ) : (
-                    filteredSorted.map((r) => {
+                    filteredSorted.map((r, index) => {
                       const sid = getStudentId(r);
-                      const rowKey = r.id || r._id || sid;
+                      const rowKey = r.id || r._id || `${sid}_${index}`;
+                      const v = r?.validation || {};
+
                       return (
                         <React.Fragment key={rowKey}>
                           <tr className="border-t border-slate-200 hover:bg-emerald-50/30">
@@ -322,6 +401,19 @@ export default function ResultsPage() {
                             <td className="px-4 py-3 font-medium text-slate-800">{sid}</td>
                             <td className="px-4 py-3 font-semibold text-emerald-700">{r.total_marks}</td>
                             <td className="px-4 py-3 text-slate-800">{r.total_max_marks}</td>
+                            <td className="px-4 py-3">
+                              {v?.status === "PARTIAL_ATTEMPT" ? (
+                                <span className="inline-flex items-center gap-1 rounded-full bg-amber-100 px-2 py-1 text-xs font-medium text-amber-700">
+                                  <AlertTriangle size={13} />
+                                  {safe(v.attempted_questions, 0)}/{safe(v.expected_questions, 0)}
+                                </span>
+                              ) : (
+                                <span className="inline-flex items-center gap-1 rounded-full bg-emerald-100 px-2 py-1 text-xs font-medium text-emerald-700">
+                                  <CheckCircle2 size={13} />
+                                  {safe(v.attempted_questions, 0)}/{safe(v.expected_questions, 0)}
+                                </span>
+                              )}
+                            </td>
                             <td className="px-4 py-3">
                               {r.manual_override ? (
                                 <span className="inline-flex items-center gap-1 rounded-full bg-emerald-100 px-2 py-1 text-xs font-medium text-emerald-700">
@@ -376,11 +468,27 @@ export default function ResultsPage() {
 
                           {expanded[rowKey] && (
                             <tr className="bg-emerald-50/40">
-                              <td colSpan={7} className="px-4 py-4">
+                              <td colSpan={8} className="px-4 py-4">
                                 <div className="rounded-xl border border-emerald-200 bg-white p-3">
                                   <h4 className="mb-3 text-sm font-semibold text-slate-900">
-                                    Question-wise Marks (Editable)
+                                    Validation + Question-wise Marks
                                   </h4>
+
+                                  <div className="mb-4 rounded-lg border border-slate-200 bg-slate-50 p-3 text-xs text-slate-800">
+                                    <p>
+                                      <span className="font-semibold">Attempted:</span>{" "}
+                                      {safe(r?.validation?.attempted_questions, 0)} / {safe(r?.validation?.expected_questions, 0)}
+                                    </p>
+                                    <p className="mt-1">
+                                      <span className="font-semibold">Status:</span> {safe(r?.validation?.status)}
+                                    </p>
+                                    <p className="mt-1">
+                                      <span className="font-semibold">Missing Questions:</span>{" "}
+                                      {Array.isArray(r?.validation?.missing_questions) && r.validation.missing_questions.length
+                                        ? r.validation.missing_questions.join(", ")
+                                        : "None"}
+                                    </p>
+                                  </div>
 
                                   <div className="overflow-x-auto">
                                     <table className="min-w-full text-xs">
@@ -479,6 +587,18 @@ function StatCard({ icon, label, value }) {
       <div className="mb-2 inline-flex rounded-lg bg-emerald-100 p-2 text-emerald-700">{icon}</div>
       <p className="text-xs font-medium uppercase tracking-wide text-slate-600">{label}</p>
       <p className="mt-1 text-2xl font-semibold text-slate-900">{value}</p>
+    </div>
+  );
+}
+
+function MiniCard({ icon, label, value }) {
+  return (
+    <div className="rounded-lg border border-slate-200 bg-white p-3">
+      <div className="mb-1 inline-flex items-center gap-1 text-slate-600">
+        {icon}
+        <span className="text-xs font-medium">{label}</span>
+      </div>
+      <p className="text-sm font-semibold text-slate-900">{value}</p>
     </div>
   );
 }

@@ -7,7 +7,7 @@ const nextConfig = {
         hostname: "static-assets.toshankanwar.in",
       },
     ],
-  },
+  },  
 };
 
 export default nextConfig;
